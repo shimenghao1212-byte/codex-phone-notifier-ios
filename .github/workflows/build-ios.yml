@@ -1,0 +1,67 @@
+name: Build iPhone app
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify project and protocol
+        run: |
+          python3 ios/scripts/verify-project.py
+          bash ios/scripts/check-on-mac.sh
+      - name: Build unsigned iPhone package
+        run: bash ios/scripts/build-unsigned.sh
+      - name: Capture native simulator screens
+        timeout-minutes: 8
+        env:
+          CODEX_KEEP_SIMULATOR: '1'
+        run: bash ios/scripts/capture-simulator.sh
+      - name: Exercise persistent Control Center toggle
+        timeout-minutes: 10
+        run: bash ios/scripts/test-control-center.sh
+      - name: Save unsigned install package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodexPhoneNotifier-unsigned
+          path: build/CodexPhoneNotifier-unsigned.ipa
+          if-no-files-found: ignore
+          retention-days: 3
+      - name: Save build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: ios/build/*.log
+          if-no-files-found: ignore
+          retention-days: 3
+      - name: Save native design captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-design-captures
+          path: ios/build/screenshots/
+          if-no-files-found: ignore
+          retention-days: 3
+      - name: Save Control Center UI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: control-center-ui
+          path: |
+            ios/build/control-ui/attachments/
+            ios/build/control-ui/*.json
+            ios/build/control-ui/*.png
+            ios/build/control-ui/*.log
+            ios/build/control-ui/*.plist
+            ios/build/control-ui/*.txt
+            ios/build/control-ui/*.ips
+          if-no-files-found: ignore
+          retention-days: 3

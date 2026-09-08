@@ -1,0 +1,9 @@
+build/
+ios/build/
+**/xcuserdata/
+**/__pycache__/
+*.pyc
+*.ipa
+*.p12
+*.mobileprovision
+.DS_Store
