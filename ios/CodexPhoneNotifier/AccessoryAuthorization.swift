@@ -3,6 +3,15 @@ import Foundation
 /// Authorization belongs to the OS. Never persist a second, potentially stale permission flag.
 /// This small reducer also enforces Apple's prohibition on starting CoreBluetooth mid-migration.
 struct AccessoryAuthorization {
+    /// Check before ASAccessorySession.init: missing runtime declaration is a
+    /// fatal framework assertion, not a recoverable activation error.
+    static func supportsBluetooth(info: [String: Any], serviceUUID: String) -> Bool {
+        guard info["NSAccessorySetupSupports"] as? [String] == ["Bluetooth"],
+              info["NSAccessorySetupKitSupports"] as? [String] == ["Bluetooth"],
+              let services = info["NSAccessorySetupBluetoothServices"] as? [String] else { return false }
+        return services.contains(serviceUUID.uppercased())
+    }
+
     struct Computer: Equatable {
         let id: UUID
         let name: String

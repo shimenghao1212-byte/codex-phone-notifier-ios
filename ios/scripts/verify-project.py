@@ -111,8 +111,8 @@ for name, target in targets.items():
     configurations = objects[target['buildConfigurationList']]['buildConfigurations']
     for key in configurations:
         settings = objects[key]['buildSettings']
-        assert settings['MARKETING_VERSION'] == '1.8.3'
-        assert settings['CURRENT_PROJECT_VERSION'] == '14'
+        assert settings['MARKETING_VERSION'] == '1.8.4'
+        assert settings['CURRENT_PROJECT_VERSION'] == '15'
         assert settings['CODE_SIGN_ENTITLEMENTS'] == 'Shared/CodexControls.entitlements'
 assert 'Shared/CodexActivityAttributes.swift' in compiled_by_target['CodexPhoneNotifier']
 assert 'CodexPhoneNotifier/LiveActivityCoordinator.swift' in compiled_by_target['CodexPhoneNotifier']
@@ -147,6 +147,7 @@ with (ROOT / 'CodexPhoneNotifier/Info.plist').open('rb') as handle:
 assert set(info['UIBackgroundModes']) == {'bluetooth-central', 'audio', 'voip'}
 assert info['NSBluetoothAlwaysUsageDescription']
 assert info['NSAccessorySetupSupports'] == ['Bluetooth']
+assert info['NSAccessorySetupKitSupports'] == ['Bluetooth']
 assert info['NSAccessorySetupBluetoothServices'] == ['5E2F4D60-A84C-4DB0-89ED-95A76E5AC901']
 assert info['CFBundleDisplayName'] == 'Codex 提醒'
 assert info['NSSupportsLiveActivities'] is True
@@ -190,7 +191,7 @@ for source in [file_paths[key] for key in source_refs]:
     assert not re.search(r'\b(URLSession|Network|WebKit)\b', text), f'Unexpected network framework: {source}'
     assert 'LiveActivityCoordinator.' not in text, f'Old activity creation path remains: {source}'
 print(f'PASS: OpenStep project parsed; {len(objects)} objects and {len(source_refs)} Swift source paths resolve.')
-print('PASS: App + one Controls extension, one shared App Group; version 1.8.3 (14).')
+print('PASS: App + one Controls extension, one shared App Group; version 1.8.4 (15).')
 print('PASS: Plists, assets, shared scheme, BLE UUIDs, restoration flags, UTF-8 and local-only structure.')
 print('NOT RUN: Swift compilation, EventFrameRegression, signing, installation, physical BLE / lock-screen tests.')
 

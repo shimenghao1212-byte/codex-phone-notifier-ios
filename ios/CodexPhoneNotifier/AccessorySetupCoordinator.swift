@@ -6,7 +6,7 @@ import UIKit
 /// No polling, periodic wake-ups, background audio, or persistent device database.
 @available(iOS 18.0, *)
 final class AccessorySetupCoordinator {
-    private let session = ASAccessorySession()
+    private let session: ASAccessorySession?
     private(set) var authorization: AccessoryAuthorization
     var changed: (() -> Void)?
     var picked: ((UUID) -> Void)?
@@ -17,9 +17,26 @@ final class AccessorySetupCoordinator {
 
     init(centralAlreadyCreated: Bool = false) {
         authorization = AccessoryAuthorization(centralAlreadyCreated: centralAlreadyCreated)
+        // Apple documents both spellings in different places. The actual iOS
+        // framework checks the Kit spelling during init, before any callback.
+        guard AccessoryAuthorization.supportsBluetooth(info: Bundle.main.infoDictionary ?? [:],
+                  serviceUUID: BluetoothReceiver.serviceUUID.uuidString) else {
+            session = nil
+            authorization.invalidate()
+            return
+        }
+        session = ASAccessorySession()
+        #if DEBUG && targetEnvironment(simulator)
+        NSLog("CodexStartup: native accessory session constructed")
+        #endif
     }
 
     func activate() {
+        guard let session else {
+            failed?("安装包的蓝牙授权配置不完整，请安装修复版本。")
+            changed?()
+            return
+        }
         session.activate(on: .main) { [weak self] event in self?.handle(event) }
     }
 
@@ -40,6 +57,7 @@ final class AccessorySetupCoordinator {
     func claimCentral(for id: UUID?) -> Bool { authorization.claimCentral(for: id) }
 
     func showPicker(selected: UUID?, name: String) {
+        guard let session else { return }
         guard UIApplication.shared.applicationState == .active else {
             failed?("请在 App 内完成一次电脑授权。"); return
         }
@@ -85,6 +103,7 @@ final class AccessorySetupCoordinator {
     }
 
     private func refresh() {
+        guard let session else { return }
         authorization.refresh(session.accessories.compactMap { accessory in
             guard accessory.state == .authorized,
                   accessory.descriptor.bluetoothServiceUUID == BluetoothReceiver.serviceUUID,

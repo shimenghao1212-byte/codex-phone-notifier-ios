@@ -72,7 +72,7 @@ data = {
     'home.png': 'Actual simulator app render; DEBUG simulator connection fixture.',
     'report.png': 'Latest report sheet with synthetic text and an existing local preview asset.',
     'settings.png': 'Settings sheet including alert mode selection.',
-    'version': '1.8.3 (14)',
+    'version': '1.8.4 (15)',
     'live_activity_creation': False,
     'physical_ble_or_lock_screen_test': False,
 }

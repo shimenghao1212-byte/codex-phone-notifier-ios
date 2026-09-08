@@ -60,7 +60,7 @@ xcodebuild -project ui-tests/ControlCenterUITests.xcodeproj -scheme ControlCente
   test > "$ios_root/build/control-ui.log" 2>&1
 result=$?
 xcrun simctl spawn "$sim" log show --last 10m --style compact \
-  --predicate '(process == "CodexControls") OR (eventMessage CONTAINS[c] "local.codex.phone") OR (eventMessage CONTAINS[c] "CodexControls")' \
+  --predicate '(process == "CodexControls") OR (eventMessage CONTAINS[c] "local.codex.phone") OR (eventMessage CONTAINS[c] "CodexControls") OR (eventMessage CONTAINS[c] "CodexStartup")' \
   > "$out/extension-system.log" 2>&1
 python3 - "$out" <<'PY'
 from pathlib import Path
@@ -82,11 +82,14 @@ from pathlib import Path
 import json, sys
 out = Path(sys.argv[1])
 registration_observed = 'foreground shortcut metadata registration requested' in (out / 'extension-system.log').read_text(errors='replace')
+native_startup_observed = 'CodexStartup: native accessory session constructed' in (out / 'extension-system.log').read_text(errors='replace')
 if int(sys.argv[2]) == 0:
     assert registration_observed, 'Foreground metadata registration lifecycle was not exercised'
+    assert native_startup_observed, 'Native startup test must execute ASAccessorySession.init without fixtures'
 (out / 'scope.json').write_text(json.dumps({
     'test_exit_code': int(sys.argv[2]),
     'foreground_metadata_registration_observed': registration_observed,
+    'native_accessory_session_constructor_observed': native_startup_observed,
     'system_ui': 'real iOS 18.5 Control Center, WidgetKit and App Intents',
     'bluetooth': 'simulated; Debug isolated simulator only',
     'physical_device_or_Apple_development_signing_verified': False

@@ -15,6 +15,7 @@
     <key>NSBluetoothAlwaysUsageDescription</key>
     <string>连接你的电脑，在 Codex 本轮处理结束时接收蓝牙提醒。</string>
     <key>NSAccessorySetupSupports</key><array><string>Bluetooth</string></array>
+    <key>NSAccessorySetupKitSupports</key><array><string>Bluetooth</string></array>
     <key>NSAccessorySetupBluetoothServices</key><array><string>5E2F4D60-A84C-4DB0-89ED-95A76E5AC901</string></array>
     <key>UIBackgroundModes</key><array><string>bluetooth-central</string><string>audio</string><string>voip</string></array>
     <key>NSSupportsLiveActivities</key><true/>

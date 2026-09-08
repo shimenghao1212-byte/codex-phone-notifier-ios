@@ -12,6 +12,21 @@ struct AccessoryAuthorizationRegression {
             precondition(condition(), message); checks += 1
         }
 
+        let service = "00000000-0000-4000-8000-000000000003"
+        let valid: [String: Any] = ["NSAccessorySetupSupports": ["Bluetooth"],
+            "NSAccessorySetupKitSupports": ["Bluetooth"], "NSAccessorySetupBluetoothServices": [service]]
+        check(AccessoryAuthorization.supportsBluetooth(info: valid, serviceUUID: service), "Valid packaged declarations")
+        for key in valid.keys {
+            var missing = valid
+            missing.removeValue(forKey: key)
+            check(!AccessoryAuthorization.supportsBluetooth(info: missing, serviceUUID: service), "Reject missing declaration before native init")
+            missing[key] = "Bluetooth"
+            check(!AccessoryAuthorization.supportsBluetooth(info: missing, serviceUUID: service), "Reject incorrect plist type")
+            missing[key] = [String]()
+            check(!AccessoryAuthorization.supportsBluetooth(info: missing, serviceUUID: service), "Reject empty declaration")
+        }
+        check(!AccessoryAuthorization.supportsBluetooth(info: valid, serviceUUID: original.uuidString), "Reject undeclared service")
+
         // Cold background launch cannot use a cached preference as OS authorization.
         var state = AccessoryAuthorization()
         check(!state.permits(original), "Wait for OS authorization snapshot")

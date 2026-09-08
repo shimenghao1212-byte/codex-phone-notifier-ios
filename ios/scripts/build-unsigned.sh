@@ -32,8 +32,8 @@ with (extensions[0] / 'Info.plist').open('rb') as handle:
     ext_info = plistlib.load(handle)
 assert ext_info['NSExtension']['NSExtensionPointIdentifier'] == 'com.apple.widgetkit-extension'
 assert ext_info['CFBundleIdentifier'] == 'local.codex.phone.notifier.controls'
-assert ext_info['CFBundleShortVersionString'] == '1.8.3'
-assert str(ext_info['CFBundleVersion']) == '14'
+assert ext_info['CFBundleShortVersionString'] == '1.8.4'
+assert str(ext_info['CFBundleVersion']) == '15'
 assert (extensions[0] / ext_info['CFBundleExecutable']).is_file()
 assert (extensions[0] / 'Metadata.appintents').is_dir(), 'Missing extension Intent metadata'
 assert (app / 'Metadata.appintents').is_dir(), 'Missing host Intent metadata'
@@ -43,9 +43,10 @@ assert (app / info['CFBundleExecutable']).is_file(), 'Missing App executable'
 binary = (app / info['CFBundleExecutable']).read_bytes()
 for test_flag in [b'CODEX_CONTROL_UI_TEST', b'codexControlUITest']:
     assert test_flag not in binary, 'Simulator control fixture leaked into Release'
-assert info['CFBundleShortVersionString'] == '1.8.3'
-assert str(info['CFBundleVersion']) == '14'
+assert info['CFBundleShortVersionString'] == '1.8.4'
+assert str(info['CFBundleVersion']) == '15'
 assert info['NSAccessorySetupSupports'] == ['Bluetooth']
+assert info['NSAccessorySetupKitSupports'] == ['Bluetooth']
 assert info['NSAccessorySetupBluetoothServices'] == ['5E2F4D60-A84C-4DB0-89ED-95A76E5AC901']
 assert 'NSAccessorySetupSupports' not in ext_info
 assert tuple(map(int, info['MinimumOSVersion'].split('.')[:2])) >= (16, 4)
@@ -54,7 +55,7 @@ for bundle in [app, extensions[0]]:
     raw = subprocess.check_output(['codesign', '-d', '--entitlements', ':-', str(bundle)], stderr=subprocess.DEVNULL)
     signed = plistlib.loads(raw)
     assert signed['com.apple.security.application-groups'] == ['group.local.codex.phone.notifier']
-print('PASS: App + Controls 1.8.3 (14), both request the same App Group; requires Apple resigning.')
+print('PASS: App + Controls 1.8.4 (15), both request the same App Group; requires Apple resigning.')
 PY
 
 staging_path="$(mktemp -d "$repo_root/build/ipa-stage.XXXXXX")"

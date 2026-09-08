@@ -1,5 +1,38 @@
 import XCTest
 
+/// No BLE/design fixture: execute the same session constructor as an installed
+/// App. Simulator service activation may fail, but the App must remain usable.
+final class NativeStartupUITests: XCTestCase {
+    func testColdLaunchWithoutFixtures() throws {
+        continueAfterFailure = false
+        let app = XCUIApplication(bundleIdentifier: "local.codex.phone.notifier")
+        app.launchEnvironment = [:]
+        // Override the persisted control fixture using the standard argument
+        // domain. This does not replace the real framework or production path.
+        app.launchArguments = ["-codexControlUITest", "NO"]
+        for attempt in 1...2 {
+            app.launch()
+            XCTAssertTrue(app.buttons["设置"].waitForExistence(timeout: 20), "Normal launch must reach Home")
+            app.buttons["设置"].tap()
+            let settled = NSPredicate { _, _ in
+                app.staticTexts["请授权这台电脑"].exists || app.staticTexts["配件授权暂时不可用"].exists
+            }
+            XCTAssertEqual(XCTWaiter.wait(for: [XCTNSPredicateExpectation(predicate: settled, object: nil)], timeout: 20), .completed,
+                           "Real native session must finish activation or report an unavailable service")
+            XCTAssertFalse(app.staticTexts["安装包的蓝牙授权配置不完整，请安装修复版本。"].exists)
+            XCTAssertFalse(app.staticTexts["模拟器控制测试"].exists)
+            XCTAssertEqual(app.state, .runningForeground)
+            let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+            screenshot.name = "native-startup-\(attempt)"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            app.buttons["完成"].tap()
+            XCTAssertTrue(app.buttons["设置"].exists)
+            app.terminate()
+        }
+    }
+}
+
 /// Runs only on a disposable CI simulator. BLE is a Debug-only fixture;
 /// Control Center, WidgetKit, App Intents, process routing and storage are real.
 final class ControlCenterUITests: XCTestCase {
