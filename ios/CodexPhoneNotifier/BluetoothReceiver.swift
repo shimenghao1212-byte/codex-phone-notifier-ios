@@ -586,12 +586,12 @@ final class BluetoothReceiver: NSObject, ObservableObject {
         resumeConnection()
     }
 
-    func authorizeComputer() {
+    func authorizeComputer(useSavedComputer: Bool = true) {
         guard usesAccessorySetup, #available(iOS 18.0, *), let accessories,
               accessories.authorization.phase == .ready, !accessories.authorization.pickerActive else { return }
         accessoryPickerCommand = controlCommands.begin()
         lastError = nil
-        accessories.showPicker(selected: selectedID, name: selectedName)
+        accessories.showPicker(selected: useSavedComputer ? selectedID : nil, name: selectedName)
     }
 
     func applicationBecameActive() {

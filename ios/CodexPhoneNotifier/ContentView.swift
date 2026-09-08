@@ -293,6 +293,10 @@ struct ContentView: View {
                     if receiver.accessoryNeedsAuthorization {
                         Text("保持电脑端运行，在苹果弹窗中确认这台电脑。完成后即可从控制中心开启提醒。")
                             .font(.footnote).foregroundStyle(.secondary)
+                        if receiver.lastError != nil && receiver.selectedID != nil {
+                            Button("重新寻找电脑") { receiver.authorizeComputer(useSavedComputer: false) }
+                                .disabled(!receiver.accessorySetupReady || receiver.accessoryPickerActive)
+                        }
                     }
                 } else {
                     Button(receiver.isScanning ? "停止寻找" : "寻找电脑") {

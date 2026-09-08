@@ -62,6 +62,12 @@ struct AccessoryAuthorizationRegression {
         check(!canceled.claimCentral(for: original), "Cancellation cannot start Bluetooth")
         check(canceled.beginPicker(selected: original), "Cancellation permits explicit retry")
         check(canceled.migrationID == original, "Retry still uses migration before any central")
+        canceled.finishPicker()
+        check(canceled.beginPicker(selected: nil), "Explicit rediscovery can recover a stale saved identity")
+        check(canceled.migrationID == nil, "Rediscovery must not retry the stale migration")
+        canceled.refresh([second])
+        canceled.finishPicker()
+        check(canceled.permits(other) && !canceled.permits(original), "Rediscovery authorizes only the new choice")
 
         // Previously authorized cold launches need no picker, but still check OS identity.
         var restored = AccessoryAuthorization()
