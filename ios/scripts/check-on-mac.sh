@@ -20,6 +20,7 @@ plutil -lint Shared/CodexControls.entitlements CodexControls/Info.plist CodexPho
 xcodebuild -project CodexPhoneNotifier.xcodeproj -scheme CodexPhoneNotifier \
   -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
   -derivedDataPath build/DerivedData-voice-report-v1.5 \
+  ARCHS="$(uname -m)" ONLY_ACTIVE_ARCH=YES \
   CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- build > build/xcodebuild.log 2>&1
 python3 scripts/verify-control-metadata.py build/DerivedData-voice-report-v1.5/Build/Products/Debug-iphonesimulator/CodexPhoneNotifier.app
 printf '%s\n' 'PASS: simulator compilation; BLE and lock-screen behavior still need a real iPhone.'

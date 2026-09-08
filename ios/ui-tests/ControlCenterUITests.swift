@@ -12,14 +12,21 @@ final class ControlCenterUITests: XCTestCase {
         receiver.launch()
         XCTAssertTrue(receiver.buttons["开始提醒"].waitForExistence(timeout: 20))
         receiver.buttons["设置"].tap()
-        if !receiver.staticTexts["控制中心状态已同步"].waitForExistence(timeout: 5) {
+        let sharedStatus = receiver.staticTexts["控制中心状态已同步"]
+        // Form materializes rows lazily. Accessory setup adds a section before
+        // Controls; reveal the row instead of treating off-screen content as absent.
+        for _ in 0..<4 {
+            if sharedStatus.waitForExistence(timeout: 1) { break }
+            receiver.swipeUp()
+        }
+        if !sharedStatus.waitForExistence(timeout: 5) {
             print("APP_SETUP_STATE\n\(receiver.debugDescription)")
             let shot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
             shot.name = "app-shared-state-setup"
             shot.lifetime = .keepAlways
             add(shot)
         }
-        XCTAssertTrue(receiver.staticTexts["控制中心状态已同步"].exists)
+        XCTAssertTrue(sharedStatus.exists)
         receiver.buttons["完成"].tap()
     }
 
